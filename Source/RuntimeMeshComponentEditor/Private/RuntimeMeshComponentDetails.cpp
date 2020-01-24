@@ -2,7 +2,7 @@
 
 #include "RuntimeMeshComponentDetails.h"
 #include "RuntimeMeshComponent.h"
-#include "DlgPickAssetPath.h"
+//#include "DlgPickAssetPath.h"
 #include "IAssetTools.h"
 #include "AssetToolsModule.h"
 #include "AssetRegistryModule.h"
@@ -13,10 +13,11 @@
 #include "DetailWidgetRow.h"
 #include "RawMesh.h"
 #include "Engine/StaticMesh.h"
-#include "Input/SCheckBox.h"
-#include "Input/SComboBox.h"
+//#include "Input/SCheckBox.h"
+//#include "Input/SComboBox.h"
 #include "RuntimeMeshProvider.h"
 #include "RuntimeMeshActor.h"
+#include "Dialogs/DlgPickAssetPath.h"
 
 #define LOCTEXT_NAMESPACE "RuntimeMeshComponentDetails"
 
@@ -260,7 +261,7 @@ FReply FRuntimeMeshComponentDetails::ClickedOnConvertToStaticMesh()
 				if (RawMesh.IsValid())
 				{
 					// Add source to new StaticMesh
-					FStaticMeshSourceModel* SrcModel = new (StaticMesh->SourceModels) FStaticMeshSourceModel();
+					FStaticMeshSourceModel* SrcModel = new (StaticMesh->GetSourceModels()) FStaticMeshSourceModel();
 					SrcModel->BuildSettings.bRecomputeNormals = false;
 					SrcModel->BuildSettings.bRecomputeTangents = false;
 					SrcModel->BuildSettings.bRemoveDegenerates = false;
@@ -279,11 +280,11 @@ FReply FRuntimeMeshComponentDetails::ClickedOnConvertToStaticMesh()
 					// Set up the SectionInfoMap to enable collision
 					for (int32 SectionIdx = 0; SectionIdx < NumMaterials; SectionIdx++)
 					{
-						FMeshSectionInfo Info = StaticMesh->SectionInfoMap.Get(LODIndex, SectionIdx);
+						FMeshSectionInfo Info = StaticMesh->GetSectionInfoMap().Get(LODIndex, SectionIdx);
 						Info.MaterialIndex = SectionIdx;
 						// TODO: Is this the correct way to handle this by just turning on collision in the top level LOD?
 						Info.bEnableCollision = LODIndex == 0; 
-						StaticMesh->SectionInfoMap.Set(LODIndex, SectionIdx, Info);
+						StaticMesh->GetSectionInfoMap().Set(LODIndex, SectionIdx, Info);
 					}
 				}
 			}

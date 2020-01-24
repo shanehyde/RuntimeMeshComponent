@@ -6,9 +6,8 @@
 #include "RuntimeMeshComponentDetails.h"
 #include "RuntimeMeshComponentEditorStyle.h"
 #include "RuntimeMeshComponentEditorCommands.h"
-
-#include "ModuleManager.h"
 #include "LevelEditor.h"
+#include "ToolMenus/Public/ToolMenuDelegates.h"
 
 class FToolBarBuilder;
 class FMenuBuilder;

@@ -19,11 +19,6 @@
       "Name": "RuntimeMeshComponent",
       "Type": "Runtime",
       "LoadingPhase": "Default"
-    },
-    {
-      "Name": "RuntimeMeshComponentEditor",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
     }
   ]
 }

@@ -3,7 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ModuleManager.h"
+#include "Modules/ModuleInterface.h"
+#include "Modules/ModuleManager.h"
 
 /**
 * The public interface to this module
