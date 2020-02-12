@@ -5,12 +5,15 @@
 #include "RuntimeMesh.h"
 
 DECLARE_CYCLE_STAT(TEXT("RuntimeMeshData - Initialize"), STAT_RuntimeMeshData_Initialize, STATGROUP_RuntimeMesh);
-DECLARE_CYCLE_STAT(TEXT("RuntimeMeshData - Update Section Properties"), STAT_RuntimeMeshData_UpdateSectionProperties, STATGROUP_RuntimeMesh);
+DECLARE_CYCLE_STAT(TEXT("RuntimeMeshData - Update Section Properties"), STAT_RuntimeMeshData_UpdateSectionProperties,
+                   STATGROUP_RuntimeMesh);
 DECLARE_CYCLE_STAT(TEXT("RuntimeMeshData - Update Section"), STAT_RuntimeMeshData_UpdateSection, STATGROUP_RuntimeMesh);
-DECLARE_CYCLE_STAT(TEXT("RuntimeMeshData - Recreate All Proxies"), STAT_RuntimeMeshData_RecreateProxies, STATGROUP_RuntimeMesh);
+DECLARE_CYCLE_STAT(TEXT("RuntimeMeshData - Recreate All Proxies"), STAT_RuntimeMeshData_RecreateProxies,
+                   STATGROUP_RuntimeMesh);
 
 
-FRuntimeMeshData::FRuntimeMeshData(const FRuntimeMeshProviderProxyRef& InBaseProvider, TWeakObjectPtr<URuntimeMesh> InParentMeshObject)
+FRuntimeMeshData::FRuntimeMeshData(const FRuntimeMeshProviderProxyRef& InBaseProvider,
+                                   TWeakObjectPtr<URuntimeMesh> InParentMeshObject)
 	: FRuntimeMeshProviderProxy(nullptr), ParentMeshObject(InParentMeshObject), BaseProvider(InBaseProvider)
 {
 	LODs.SetNum(RUNTIMEMESH_MAXLODS);
@@ -23,7 +26,6 @@ FRuntimeMeshData::FRuntimeMeshData(const FRuntimeMeshProviderProxyRef& InBasePro
 
 FRuntimeMeshData::~FRuntimeMeshData()
 {
-
 }
 
 int32 FRuntimeMeshData::GetNumMaterials() const
@@ -87,7 +89,8 @@ void FRuntimeMeshData::ConfigureLOD(int32 LODIndex, const FRuntimeMeshLODPropert
 	}
 }
 
-void FRuntimeMeshData::CreateSection(int32 LODIndex, int32 SectionId, const FRuntimeMeshSectionProperties& SectionProperties)
+void FRuntimeMeshData::CreateSection(int32 LODIndex, int32 SectionId,
+                                     const FRuntimeMeshSectionProperties& SectionProperties)
 {
 	{
 		FScopeLock Lock(&SyncRoot);
@@ -115,7 +118,7 @@ bool FRuntimeMeshData::SetupMaterialSlot(int32 MaterialSlot, FName SlotName, UMa
 		}
 		return false;
 	}
-	
+
 	if (!MaterialSlots.IsValidIndex(MaterialSlot))
 	{
 		MaterialSlots.SetNum(MaterialSlot + 1);
@@ -135,7 +138,7 @@ void FRuntimeMeshData::MarkSectionDirty(int32 LODIndex, int32 SectionId)
 		RenderProxy->ClearSection_GameThread(LODIndex, SectionId);
 
 		HandleProxySectionUpdate(LODIndex, SectionId);
-	}	
+	}
 }
 
 void FRuntimeMeshData::SetSectionVisibility(int32 LODIndex, int32 SectionId, bool bIsVisible)
@@ -195,7 +198,8 @@ void FRuntimeMeshData::HandleProxySectionPropertiesUpdate(int32 LODIndex, int32 
 	}
 }
 
-void FRuntimeMeshData::HandleProxySectionUpdate(int32 LODIndex, int32 SectionId, bool bForceRecreateProxies, bool bSkipRecreateProxies)
+void FRuntimeMeshData::HandleProxySectionUpdate(int32 LODIndex, int32 SectionId, bool bForceRecreateProxies,
+                                                bool bSkipRecreateProxies)
 {
 	SCOPE_CYCLE_COUNTER(STAT_RuntimeMeshData_UpdateSection);
 
@@ -206,7 +210,8 @@ void FRuntimeMeshData::HandleProxySectionUpdate(int32 LODIndex, int32 SectionId,
 
 		bool bRequiresProxyRecreate = bForceRecreateProxies;
 
-		const auto UpdateSingleSection = [&](int32 LODIdx, int32 SectionIdx, FRuntimeMeshSectionProperties& Properties) {
+		const auto UpdateSingleSection = [&](int32 LODIdx, int32 SectionIdx, FRuntimeMeshSectionProperties& Properties)
+		{
 			TSharedPtr<FRuntimeMeshRenderableMeshData> MeshData = MakeShared<FRuntimeMeshRenderableMeshData>(
 				Properties.bUseHighPrecisionTangents,
 				Properties.bUseHighPrecisionTexCoords,
@@ -226,11 +231,15 @@ void FRuntimeMeshData::HandleProxySectionUpdate(int32 LODIndex, int32 SectionId,
 			bRequiresProxyRecreate |= Properties.UpdateFrequency == ERuntimeMeshUpdateFrequency::Infrequent;
 		};
 
-		const auto UpdateSingleLOD = [&](int32 LODIdx) {
+		const auto UpdateSingleLOD = [&](int32 LODIdx)
+		{
 			if (SectionId != INDEX_NONE)
 			{
-				FRuntimeMeshSectionProperties Properties = LODs[LODIdx].Sections.FindChecked(SectionId);
-				UpdateSingleSection(LODIdx, SectionId, Properties);
+				if (LODs[LODIdx].Sections.Contains(SectionId))
+				{
+					FRuntimeMeshSectionProperties Properties = LODs[LODIdx].Sections.FindChecked(SectionId);
+					UpdateSingleSection(LODIdx, SectionId, Properties);
+				}
 			}
 			else
 			{
@@ -252,8 +261,6 @@ void FRuntimeMeshData::HandleProxySectionUpdate(int32 LODIndex, int32 SectionId,
 				UpdateSingleLOD(Index);
 			}
 		}
-
-		
 
 
 		if (!bSkipRecreateProxies && bRequiresProxyRecreate && RenderProxy.IsValid())
@@ -286,7 +293,8 @@ FRuntimeMeshProxyPtr FRuntimeMeshData::GetOrCreateRenderProxy(ERHIFeatureLevel::
 	{
 		FScopeLock Lock(&SyncRoot);
 
-		RenderProxy = MakeShareable(new FRuntimeMeshProxy(InFeatureLevel), FRuntimeMeshRenderThreadDeleter<FRuntimeMeshProxy>());
+		RenderProxy = MakeShareable(new FRuntimeMeshProxy(InFeatureLevel),
+		                            FRuntimeMeshRenderThreadDeleter<FRuntimeMeshProxy>());
 
 		for (int32 LODIndex = 0; LODIndex < LODs.Num(); LODIndex++)
 		{
